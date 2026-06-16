@@ -152,11 +152,11 @@ describe('Dashboard Integration Tests', () => {
       expect(response.body.data[0].risk).toBe('high'); // 10 days <= 15 days is high
     });
 
-    it('should deny access to cashiers', async () => {
+    it('should allow access to cashiers', async () => {
       const response = await request(app)
         .get('/api/v1/dashboard/waste-risk')
         .set('Cookie', `token=${cashierToken}`);
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(200);
     });
   });
 });

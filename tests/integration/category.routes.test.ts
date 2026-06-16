@@ -79,13 +79,13 @@ describe('Category Routes Integration Tests', () => {
       expect(saved).not.toBeNull();
     });
 
-    it('should prevent cashier from creating a category', async () => {
+    it('should allow cashier to create a category', async () => {
       const response = await request(app)
         .post('/api/v1/categories')
         .set('Cookie', `token=${cashierToken}`)
         .send({ name: 'Cashier Category' });
 
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(201);
     });
 
     it('should throw conflict if category name exists', async () => {

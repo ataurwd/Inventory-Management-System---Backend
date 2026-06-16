@@ -20,9 +20,12 @@ router.get('/', getProducts);
 router.get('/:id', getProduct);
 router.get('/barcode/:code', getProductByBarcode);
 
-// Write/Edit routes restricted to admin and manager roles
-router.post('/', authorize('admin', 'manager'), createProduct);
-router.put('/:id', authorize('admin', 'manager'), updateProduct);
-router.delete('/:id', authorize('admin', 'manager'), deleteProduct);
+// Write/Edit routes available to all authenticated roles
+router.post('/', createProduct);
+router.put('/:id', updateProduct);
+
+// Deletion is strictly restricted to administrator role only
+router.delete('/:id', authorize('admin'), deleteProduct);
+
 
 export default router;

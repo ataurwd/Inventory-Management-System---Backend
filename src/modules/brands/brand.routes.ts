@@ -16,13 +16,14 @@ router.use(authenticate);
 // GET /api/v1/brands - Get all brands (all authenticated roles)
 router.get('/', getAllBrands);
 
-// POST /api/v1/brands - Create a brand (admin, manager only)
-router.post('/', authorize('admin', 'manager'), createBrand);
+// POST /api/v1/brands - Create a brand (all authenticated roles)
+router.post('/', createBrand);
 
-// PUT /api/v1/brands/:id - Update a brand (admin, manager only)
-router.put('/:id', authorize('admin', 'manager'), updateBrand);
+// PUT /api/v1/brands/:id - Update a brand (all authenticated roles)
+router.put('/:id', updateBrand);
 
-// DELETE /api/v1/brands/:id - Delete a brand (admin, manager only)
-router.delete('/:id', authorize('admin', 'manager'), deleteBrand);
+// DELETE /api/v1/brands/:id - Delete a brand (admin only)
+router.delete('/:id', authorize('admin'), deleteBrand);
+
 
 export default router;

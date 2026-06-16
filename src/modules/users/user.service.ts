@@ -34,3 +34,30 @@ export async function getUserCount(): Promise<number> {
 export async function getAllUsers(): Promise<IUser[]> {
   return User.find({ isActive: true }).select('-passwordHash').sort({ createdAt: -1 });
 }
+
+export async function updateUser(
+  id: string,
+  data: {
+    name?: string;
+    email?: string;
+    role?: 'admin' | 'manager' | 'cashier';
+    password?: string;
+  }
+): Promise<IUser | null> {
+  const user = await User.findById(id);
+  if (!user) return null;
+
+  if (data.name !== undefined) user.name = data.name;
+  if (data.email !== undefined) user.email = data.email;
+  if (data.role !== undefined) user.role = data.role;
+  if (data.password) {
+    user.passwordHash = data.password; // triggers the pre('save') password hashing hook
+  }
+
+  return user.save();
+}
+
+export async function deleteUser(id: string): Promise<IUser | null> {
+  return User.findByIdAndUpdate(id, { isActive: false }, { new: true });
+}
+

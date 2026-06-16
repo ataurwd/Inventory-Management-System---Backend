@@ -8,6 +8,6 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/stats', getDashboardStats);
-router.get('/waste-risk', authorize('admin', 'manager'), getDashboardWasteRisk);
+router.get('/waste-risk', getDashboardWasteRisk);
 
 export default router;
