@@ -7,15 +7,33 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
   try {
     const search = req.query.search?.toString();
     const category = req.query.category?.toString();
+    const status = req.query.status?.toString();
     const products = await productService.getAllProducts({ search, category });
     
-    const data = products.map((p) => {
+    let data = products.map((p) => {
       const plain = p.toJSON();
       return {
         ...plain,
         totalStock: productService.getTotalStock(p),
       };
     });
+
+    if (status && status !== 'all') {
+      data = data.filter((product) => {
+        const stock = product.totalStock;
+        const safety = product.safetyStockLevel;
+        if (status === 'critical') {
+          return stock < safety;
+        }
+        if (status === 'warning') {
+          return stock >= safety && stock < safety * 1.5;
+        }
+        if (status === 'safe') {
+          return stock >= safety * 1.5;
+        }
+        return true;
+      });
+    }
 
     return success(res, data);
   } catch (error) {

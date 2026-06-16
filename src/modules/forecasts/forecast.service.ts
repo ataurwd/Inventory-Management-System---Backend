@@ -3,13 +3,28 @@ import { Forecast, IForecast } from './forecast.model';
 import { Product } from '../products/product.model';
 import { getProductForecast } from '../../services/ai.client';
 import { logger } from '../../utils/logger';
+import '../suppliers/supplier.model'; // Force Supplier model registration
 
 export async function getForecastByProduct(productId: string) {
-  return Forecast.findOne({ productId }).populate('productId', 'name barcode unit category');
+  return Forecast.findOne({ productId }).populate({
+    path: 'productId',
+    select: 'name barcode unit category supplierId',
+    populate: {
+      path: 'supplierId',
+      select: 'name contactEmail phone address'
+    }
+  });
 }
 
 export async function getAllForecasts() {
-  return Forecast.find().populate('productId', 'name barcode unit category');
+  return Forecast.find().populate({
+    path: 'productId',
+    select: 'name barcode unit category supplierId',
+    populate: {
+      path: 'supplierId',
+      select: 'name contactEmail phone address'
+    }
+  });
 }
 
 export async function runForecastForProduct(productId: mongoose.Types.ObjectId | string): Promise<IForecast | null> {

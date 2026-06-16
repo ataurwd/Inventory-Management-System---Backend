@@ -87,14 +87,26 @@ export async function getWasteRisk() {
     for (const batch of product.batches) {
       const days = daysUntilExpiry(batch.expiry_date);
       if (days <= 30 && days >= 0) {
+        let suggestion = 'Bundle promotion — pair with fast-moving item';
+        if (days <= 7) {
+          suggestion = 'BOGO — Buy 1 Get 1 Free';
+        } else if (days <= 15) {
+          suggestion = '25% clearance discount';
+        }
+
+        const estimatedLoss = parseFloat((batch.qty * product.costPrice).toFixed(2));
+
         result.push({
           productId: product._id,
           name: product.name,
           category: product.category,
           batchNo: batch.batch_no,
           qty: batch.qty,
+          costPrice: product.costPrice,
           expiryDate: batch.expiry_date,
           daysRemaining: days,
+          estimatedLoss,
+          suggestion,
           risk: days <= 7 ? 'critical' : days <= 15 ? 'high' : 'medium'
         });
       }
