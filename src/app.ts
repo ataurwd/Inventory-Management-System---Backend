@@ -17,6 +17,8 @@ import categoryRouter from './modules/categories/category.routes';
 import forecastRouter from './modules/forecasts/forecast.routes';
 import chatRouter from './modules/chat/chat.routes';
 import supplierRouter from './modules/suppliers/supplier.routes';
+import saleRouter from './modules/sales/sale.routes';
+import brandRouter from './modules/brands/brand.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -66,6 +68,8 @@ export function createApp(): Application {
   app.use('/api/v1/forecasts', forecastRouter);
   app.use('/api/v1/chat', chatRouter);
   app.use('/api/v1/suppliers', supplierRouter);
+  app.use('/api/v1/sales', saleRouter);
+  app.use('/api/v1/brands', brandRouter);
 
   // ─── 404 Handler ─────────────────────────────────────────────────
   app.use(notFound);

@@ -11,6 +11,8 @@ export interface CreateTransactionInput {
   total: number;
   performedBy: string | mongoose.Types.ObjectId;
   timestamp?: Date;
+  saleId?: string | mongoose.Types.ObjectId;
+  expiryDate?: Date;
 }
 
 export async function createTransaction(data: CreateTransactionInput) {

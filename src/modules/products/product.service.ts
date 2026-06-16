@@ -4,7 +4,7 @@ import { ApiError } from '../../utils/api-error.util';
 import mongoose from 'mongoose';
 import '../suppliers/supplier.model'; // Force Supplier model registration for populations
 
-export async function getAllProducts(filters: { search?: string; category?: string }) {
+export async function getAllProducts(filters: { search?: string; category?: string; brand?: string }) {
   const query: any = { isDeleted: false };
 
   if (filters.search) {
@@ -16,6 +16,10 @@ export async function getAllProducts(filters: { search?: string; category?: stri
 
   if (filters.category) {
     query.category = filters.category;
+  }
+
+  if (filters.brand) {
+    query.brand = filters.brand;
   }
 
   return Product.find(query).populate('supplierId', 'name');

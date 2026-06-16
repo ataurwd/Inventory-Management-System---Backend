@@ -7,8 +7,9 @@ export async function getProducts(req: Request, res: Response, next: NextFunctio
   try {
     const search = req.query.search?.toString();
     const category = req.query.category?.toString();
+    const brand = req.query.brand?.toString();
     const status = req.query.status?.toString();
-    const products = await productService.getAllProducts({ search, category });
+    const products = await productService.getAllProducts({ search, category, brand });
     
     let data = products.map((p) => {
       const plain = p.toJSON();

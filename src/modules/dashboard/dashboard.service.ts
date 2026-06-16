@@ -17,13 +17,16 @@ export async function getStats() {
   });
   const todayRevenue = todaySales.reduce((sum, t) => sum + t.total, 0);
 
-  // 3. Low stock and expiry counts
+  // 3. Low stock, expiry counts, and inventory valuation
   const allProducts = await Product.find({ isDeleted: false });
   let totalLowStockAlerts = 0;
   let totalExpiryAlerts = 0;
+  let inventoryValuation = 0;
 
   for (const p of allProducts) {
     const totalStock = getTotalStock(p);
+    inventoryValuation += totalStock * p.costPrice;
+
     if (totalStock < p.safetyStockLevel) {
       totalLowStockAlerts++;
     }
@@ -34,7 +37,7 @@ export async function getStats() {
     }
   }
 
-  // 4. Weekly revenue (last 7 days, including today)
+  // 4. Weekly revenue and purchases (last 7 days, including today)
   const startOf7DaysAgo = new Date();
   startOf7DaysAgo.setDate(startOf7DaysAgo.getDate() - 6);
   startOf7DaysAgo.setHours(0, 0, 0, 0);
@@ -54,28 +57,113 @@ export async function getStats() {
     }
   ]);
 
+  const weeklyRestocks = await Transaction.aggregate([
+    {
+      $match: {
+        type: 'restock',
+        timestamp: { $gte: startOf7DaysAgo }
+      }
+    },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+        expense: { $sum: '$total' }
+      }
+    }
+  ]);
+
   const weeklyRevenueMap = new Map<string, number>();
   weeklySales.forEach((s) => {
     weeklyRevenueMap.set(s._id, s.revenue);
   });
 
+  const weeklyExpenseMap = new Map<string, number>();
+  weeklyRestocks.forEach((r) => {
+    weeklyExpenseMap.set(r._id, r.expense);
+  });
+
   const weeklyRevenue: { date: string; revenue: number }[] = [];
+  const salesVsPurchases: { date: string; sales: number; purchases: number }[] = [];
+  let total7DaysRevenue = 0;
+  let total7DaysExpense = 0;
+
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
+    
+    const rev = parseFloat((weeklyRevenueMap.get(dateStr) || 0).toFixed(2));
+    const exp = parseFloat((weeklyExpenseMap.get(dateStr) || 0).toFixed(2));
+    
+    total7DaysRevenue += rev;
+    total7DaysExpense += exp;
+
     weeklyRevenue.push({
       date: dateStr,
-      revenue: parseFloat((weeklyRevenueMap.get(dateStr) || 0).toFixed(2)),
+      revenue: rev,
+    });
+
+    salesVsPurchases.push({
+      date: dateStr,
+      sales: rev,
+      purchases: exp,
     });
   }
+
+  const profitOrLoss = parseFloat((total7DaysRevenue - total7DaysExpense).toFixed(2));
+
+  // 5. Recent Transactions
+  const recentTransactions = await Transaction.find()
+    .sort({ timestamp: -1 })
+    .limit(10)
+    .populate('productId', 'name category')
+    .populate('performedBy', 'name role')
+    .lean();
+
+  // 6. Top Selling Products (Lifetime or 30 days? Let's do lifetime for now)
+  const topSellingAggregation = await Transaction.aggregate([
+    {
+      $match: { type: 'sale' }
+    },
+    {
+      $group: {
+        _id: '$productId',
+        totalQty: { $sum: '$qty' },
+        totalRevenue: { $sum: '$total' }
+      }
+    },
+    {
+      $sort: { totalQty: -1 }
+    },
+    {
+      $limit: 5
+    }
+  ]);
+
+  const topSellingProducts = await Promise.all(
+    topSellingAggregation.map(async (ts) => {
+      const product = await Product.findById(ts._id).select('name category unit sellingPrice');
+      return {
+        productId: ts._id,
+        name: product ? product.name : 'Unknown Product',
+        category: product ? product.category : 'N/A',
+        totalQty: ts.totalQty,
+        totalRevenue: parseFloat(ts.totalRevenue.toFixed(2)),
+      };
+    })
+  );
 
   return {
     totalProducts,
     todayRevenue: parseFloat(todayRevenue.toFixed(2)),
     totalLowStockAlerts,
     totalExpiryAlerts,
-    weeklyRevenue
+    inventoryValuation: parseFloat(inventoryValuation.toFixed(2)),
+    weeklyRevenue,
+    salesVsPurchases,
+    profitOrLoss,
+    recentTransactions,
+    topSellingProducts,
   };
 }
 

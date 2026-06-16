@@ -16,6 +16,7 @@ export interface IProduct extends Document {
   sellingPrice: number;
   safetyStockLevel: number;
   supplierId: mongoose.Types.ObjectId | null;
+  brand?: string;
   batches: IBatch[];
   isDeleted: boolean;
   createdAt: Date;
@@ -83,6 +84,11 @@ const productSchema = new Schema<IProduct>(
       type: Schema.Types.ObjectId,
       ref: 'Supplier',
       default: null,
+    },
+    brand: {
+      type: String,
+      trim: true,
+      default: '',
     },
     batches: {
       type: [batchSchema],

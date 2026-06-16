@@ -16,8 +16,9 @@ export const CreateProductSchema = z.object({
   unit: z.string().min(1, 'Unit is required'),
   costPrice: z.number().nonnegative('Cost price cannot be negative'),
   sellingPrice: z.number().nonnegative('Selling price cannot be negative'),
-  safetyStockLevel: z.number().nonnegative('Safety stock level cannot be negative').default(0),
+  safetyStockLevel: z.number().nonnegative('Min stock cannot be negative').default(0),
   supplierId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid supplier ID').nullable().optional(),
+  brand: z.string().optional().default(''),
   batches: z.array(BatchValidationSchema).optional().default([]),
 });
 

@@ -10,6 +10,8 @@ export interface ITransaction extends Document {
   total: number;
   performedBy: mongoose.Types.ObjectId;
   timestamp: Date;
+  saleId?: mongoose.Types.ObjectId;
+  expiryDate?: Date;
 }
 
 const transactionSchema = new Schema<ITransaction>(
@@ -48,6 +50,15 @@ const transactionSchema = new Schema<ITransaction>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    saleId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Sale',
+      default: null,
+    },
+    expiryDate: {
+      type: Date,
+      default: null,
     },
     timestamp: {
       type: Date,
