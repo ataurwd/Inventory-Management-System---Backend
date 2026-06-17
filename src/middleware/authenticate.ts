@@ -5,6 +5,7 @@ import { ApiError } from '../utils/api-error.util';
 /**
  * Middleware: Verify JWT from HttpOnly cookie → attach req.user
  */
+// update code 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
     let token = req.cookies?.token;
