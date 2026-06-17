@@ -18,9 +18,20 @@ export function registerSocketManager(io: Server) {
   // Authentication Middleware
   io.use((socket: Socket, next) => {
     try {
-      const cookieHeader = socket.handshake.headers.cookie;
-      const cookies = parseCookies(cookieHeader);
-      const token = cookies.token;
+      let token = socket.handshake.auth?.token;
+
+      if (!token) {
+        const authHeader = socket.handshake.headers.authorization;
+        if (authHeader?.startsWith('Bearer ')) {
+          token = authHeader.split(' ')[1];
+        }
+      }
+
+      if (!token) {
+        const cookieHeader = socket.handshake.headers.cookie;
+        const cookies = parseCookies(cookieHeader);
+        token = cookies.token;
+      }
 
       if (!token) {
         return next(new Error('Authentication token missing'));

@@ -7,7 +7,11 @@ import { ApiError } from '../utils/api-error.util';
  */
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
-    const token = req.cookies?.token;
+    let token = req.cookies?.token;
+
+    if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       throw ApiError.unauthorized('No authentication token provided');

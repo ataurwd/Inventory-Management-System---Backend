@@ -80,6 +80,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     logger.info(`User logged in: ${user.email}`);
 
     return success(res, {
+      token,
       user: {
         id: user._id,
         name: user.name,
