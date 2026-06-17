@@ -8,10 +8,16 @@ import { ApiError } from '../utils/api-error.util';
 // update code 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
-    let token = req.cookies?.token;
+    let token = undefined;
 
-    if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+    // 1. Try to get token from Authorization header first
+    if (req.headers.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+    }
+
+    // 2. Fallback to cookie if no header is present
+    if (!token && req.cookies?.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {
