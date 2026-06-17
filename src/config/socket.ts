@@ -5,9 +5,10 @@ import { env } from '../config/env';
 let io: Server | null = null;
 
 export function initSocket(server: http.Server): Server {
+  const allowedOrigins = env.CLIENT_URL.split(',').map((url) => url.trim());
   io = new Server(server, {
     cors: {
-      origin: env.CLIENT_URL,
+      origin: allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     },

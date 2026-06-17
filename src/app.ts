@@ -29,9 +29,11 @@ export function createApp(): Application {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
+  const allowedOrigins = env.CLIENT_URL.split(',').map((url) => url.trim());
+
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin: allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
