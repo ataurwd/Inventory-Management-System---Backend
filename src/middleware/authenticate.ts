@@ -3,21 +3,15 @@ import { verifyAccessToken } from '../modules/auth/auth.service';
 import { ApiError } from '../utils/api-error.util';
 
 /**
- * Middleware: Verify JWT from HttpOnly cookie → attach req.user
+ * Middleware: Verify JWT from Authorization header → attach req.user
  */
-// update code 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
     let token = undefined;
 
-    // 1. Try to get token from Authorization header first
+    // strictly require token from Authorization header
     if (req.headers.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
-    }
-
-    // 2. Fallback to cookie if no header is present
-    if (!token && req.cookies?.token) {
-      token = req.cookies.token;
     }
 
     if (!token) {

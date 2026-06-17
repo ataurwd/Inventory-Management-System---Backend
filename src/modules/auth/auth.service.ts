@@ -39,28 +39,3 @@ export function verifyAccessToken(token: string): JwtPayload {
 export function verifyRefreshToken(token: string): JwtPayload {
   return jwt.verify(token, env.JWT_REFRESH_SECRET) as JwtPayload;
 }
-
-/**
- * Cookie options for HttpOnly token
- */
-export function getCookieOptions() {
-  const isProd = env.NODE_ENV === 'production';
-  return {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-    path: '/',
-  };
-}
-
-export function getRefreshCookieOptions() {
-  const isProd = env.NODE_ENV === 'production';
-  return {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
-    path: '/',
-  };
-}

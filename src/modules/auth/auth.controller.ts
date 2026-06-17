@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { LoginSchema, RegisterSchema } from './auth.validation';
 import { findByEmail, createUser, updateLastLogin, getUserCount } from '../users/user.service';
-import { signAccessToken, getCookieOptions } from './auth.service';
+import { signAccessToken } from './auth.service';
 import { ApiError } from '../../utils/api-error.util';
 import { success, created } from '../../utils/api-response.util';
 import { logger } from '../../utils/logger';
@@ -74,9 +74,6 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       name: user.name,
     });
 
-    // Set HttpOnly cookie
-    res.cookie('token', token, getCookieOptions());
-
     logger.info(`User logged in: ${user.email}`);
 
     return success(res, {
@@ -99,14 +96,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
  */
 export async function logout(_req: Request, res: Response, next: NextFunction) {
   try {
-    const isProd = process.env.NODE_ENV === 'production';
-    res.clearCookie('token', {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      path: '/',
-    });
-
+    // With pure bearer tokens, logout is mostly a client-side action (clearing local storage)
     return success(res, { message: 'Logged out successfully' });
   } catch (error) {
     next(error);

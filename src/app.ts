@@ -1,6 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { env } from './config/env';
 import { ApiError } from './utils/api-error.util';
@@ -25,25 +24,24 @@ import userRouter from './modules/users/user.routes';
 export function createApp(): Application {
   const app = express();
 
-  // Trust proxy is required for Render/Vercel to handle secure cookies correctly
+  // Trust proxy is required for Render/Vercel
   app.set('trust proxy', 1);
 
   // ─── Core Middleware ──────────────────────────────────────────────
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
-  app.use(cookieParser());
   const allowedOrigins = env.CLIENT_URL.split(',').map((url) => url.trim());
 
   app.use(
     cors({
       origin: allowedOrigins,
-      credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     })
   );
 
   // ─── HTTP Logging ─────────────────────────────────────────────────
+
   if (env.NODE_ENV !== 'test') {
     app.use(
       morgan('combined', {
