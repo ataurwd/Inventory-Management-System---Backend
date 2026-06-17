@@ -25,6 +25,9 @@ import userRouter from './modules/users/user.routes';
 export function createApp(): Application {
   const app = express();
 
+  // Trust proxy is required for Render/Vercel to handle secure cookies correctly
+  app.set('trust proxy', 1);
+
   // ─── Core Middleware ──────────────────────────────────────────────
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
