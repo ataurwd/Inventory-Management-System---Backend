@@ -15,7 +15,6 @@ export async function register(req: Request, res: Response, next: NextFunction) 
   try {
     const data = RegisterSchema.parse(req.body);
 
-    // Check if email already exists
     const existing = await findByEmail(data.email);
     if (existing) {
       throw ApiError.conflict('Email already registered', 'EMAIL_EXISTS');
