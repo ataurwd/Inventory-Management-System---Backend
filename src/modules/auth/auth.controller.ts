@@ -99,10 +99,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
  */
 export async function logout(_req: Request, res: Response, next: NextFunction) {
   try {
+    const isProd = process.env.NODE_ENV === 'production';
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       path: '/',
     });
 
