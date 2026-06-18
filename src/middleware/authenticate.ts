@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '../modules/auth/auth.service';
+import { getAuth } from 'firebase-admin/auth';
 import { ApiError } from '../utils/api-error.util';
+import { findByEmail } from '../modules/users/user.service';
+import { logger } from '../utils/logger';
 
 /**
- * Middleware: Verify JWT from Authorization header → attach req.user
+ * Middleware: Verify Firebase JWT from Authorization header → attach req.user
  */
-export function authenticate(req: Request, _res: Response, next: NextFunction) {
+export async function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
     let token = undefined;
 
@@ -18,21 +20,36 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
       throw ApiError.unauthorized('No authentication token provided');
     }
 
-    const decoded = verifyAccessToken(token);
+    // Verify Firebase token
+    const decodedToken = await getAuth().verifyIdToken(token);
+    
+    if (!decodedToken.email) {
+       throw ApiError.unauthorized('Invalid token: missing email');
+    }
+
+    // Look up the user in MongoDB by email to get their role
+    const user = await findByEmail(decodedToken.email);
+    
+    if (!user) {
+      // In a real migration, you might want to auto-create the user here if they authenticated via Google
+      // For now, we reject if they aren't in the database.
+      logger.warn(`User authenticated via Firebase but not found in DB: ${decodedToken.email}`);
+      throw ApiError.unauthorized("You don't have an account. Please contact the administrator.");
+    }
 
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-      name: decoded.name,
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      name: user.name,
     };
 
     next();
   } catch (error: any) {
-    if (error?.name === 'TokenExpiredError') {
+    if (error.code === 'auth/id-token-expired') {
       return next(ApiError.unauthorized('Token has expired'));
     }
-    if (error?.name === 'JsonWebTokenError') {
+    if (error.code === 'auth/argument-error' || error.code === 'auth/invalid-id-token') {
       return next(ApiError.unauthorized('Invalid token'));
     }
     next(error);

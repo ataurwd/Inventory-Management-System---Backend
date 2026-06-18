@@ -3,6 +3,7 @@ import { createApp } from './app';
 import { connectDB } from './config/db';
 import { env } from './config/env';
 import { logger } from './utils/logger';
+import { initFirebase } from './config/firebase';
 import { initSocket } from './config/socket';
 import { registerSocketManager } from './sockets/socket.manager';
 import { initScheduler } from './jobs/scheduler';
@@ -10,6 +11,9 @@ import { initScheduler } from './jobs/scheduler';
 async function bootstrap(): Promise<void> {
   // ─── Connect to Database ──────────────────────────────────────────
   await connectDB();
+
+  // ─── Initialize Firebase Admin ────────────────────────────────────
+  initFirebase();
 
   // ─── Create Express App ───────────────────────────────────────────
   const app = createApp();

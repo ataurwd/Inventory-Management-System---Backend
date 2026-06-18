@@ -13,6 +13,20 @@ import { success, created } from '../../utils/api-response.util';
 import { logger } from '../../utils/logger';
 
 /**
+ * GET /api/v1/users/me
+ */
+export async function getMe(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized('Not authenticated');
+    }
+    return success(res, req.user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
  * GET /api/v1/users
  */
 export async function getUsers(_req: Request, res: Response, next: NextFunction) {

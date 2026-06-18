@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
-import { verifyAccessToken } from '../modules/auth/auth.service';
+import { getAuth } from 'firebase-admin/auth';
+import { findByEmail } from '../modules/users/user.service';
 import { logger } from '../utils/logger';
 
 function parseCookies(cookieHeader?: string) {
@@ -16,7 +17,7 @@ function parseCookies(cookieHeader?: string) {
 
 export function registerSocketManager(io: Server) {
   // Authentication Middleware
-  io.use((socket: Socket, next) => {
+  io.use(async (socket: Socket, next) => {
     try {
       let token = socket.handshake.auth?.token;
 
@@ -37,14 +38,24 @@ export function registerSocketManager(io: Server) {
         return next(new Error('Authentication token missing'));
       }
 
-      const decoded = verifyAccessToken(token);
+      const decodedToken = await getAuth().verifyIdToken(token);
       
+      if (!decodedToken.email) {
+        return next(new Error('Invalid token: missing email'));
+      }
+
+      const user = await findByEmail(decodedToken.email);
+      
+      if (!user) {
+        return next(new Error("You don't have an account. Please contact the administrator."));
+      }
+
       // Attach user object to socket
       (socket as any).user = {
-        id: decoded.id,
-        email: decoded.email,
-        role: decoded.role,
-        name: decoded.name,
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role,
+        name: user.name,
       };
 
       next();

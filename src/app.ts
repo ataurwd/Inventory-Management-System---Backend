@@ -6,7 +6,7 @@ import { ApiError } from './utils/api-error.util';
 import { logger } from './utils/logger';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
-import authRouter from './modules/auth/auth.routes';
+
 import productRouter from './modules/products/product.routes';
 import batchRouter from './modules/batches/batch.routes';
 import inventoryRouter from './modules/inventory/inventory.routes';
@@ -63,7 +63,7 @@ export function createApp(): Application {
   });
 
   // ─── API Routes ──────────────────────────────────────────────────
-  app.use('/api/v1/auth', authRouter);
+
   app.use('/api/v1/products', productRouter);
   app.use('/api/v1/products/:id/batches', batchRouter);
   app.use('/api/v1/inventory', inventoryRouter);
