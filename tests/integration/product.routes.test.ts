@@ -4,7 +4,10 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Product } from '../../src/modules/products/product.model';
 import { User } from '../../src/modules/users/user.model';
-import { signAccessToken } from '../../src/modules/auth/auth.service';
+
+jest.mock('../../src/middleware/authenticate', () => {
+  return require('../__mocks__/authenticate.mock');
+});
 
 let mongoServer: MongoMemoryServer;
 const app = createApp();
@@ -36,7 +39,7 @@ describe('Product Routes Integration Tests', () => {
     name: 'Cashier User',
   };
 
-  const cashierToken = signAccessToken(cashierPayload);
+  const cashierToken = encodeURIComponent(JSON.stringify(cashierPayload));
 
   describe('GET /api/v1/products', () => {
     it('should list all products', async () => {

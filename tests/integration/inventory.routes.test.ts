@@ -5,7 +5,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Product } from '../../src/modules/products/product.model';
 import { User } from '../../src/modules/users/user.model';
 import { Transaction } from '../../src/modules/transactions/transaction.model';
-import { signAccessToken } from '../../src/modules/auth/auth.service';
+
+jest.mock('../../src/middleware/authenticate', () => {
+  return require('../__mocks__/authenticate.mock');
+});
 
 let mongoServer: MongoMemoryServer;
 const app = createApp();
@@ -39,7 +42,7 @@ describe('Inventory Integration Tests', () => {
     name: 'Test Cashier',
   };
 
-  const token = signAccessToken(mockUserPayload);
+  const token = encodeURIComponent(JSON.stringify(mockUserPayload));
 
   describe('POST /api/v1/inventory/scan-sell', () => {
     it('should deduct stock using FIFO and create transactions', async () => {

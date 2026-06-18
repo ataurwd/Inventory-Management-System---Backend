@@ -5,7 +5,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Category } from '../../src/modules/categories/category.model';
 import { Product } from '../../src/modules/products/product.model';
 import { User } from '../../src/modules/users/user.model';
-import { signAccessToken } from '../../src/modules/auth/auth.service';
+
+jest.mock('../../src/middleware/authenticate', () => {
+  return require('../__mocks__/authenticate.mock');
+});
 
 let mongoServer: MongoMemoryServer;
 const app = createApp();
@@ -45,8 +48,8 @@ describe('Category Routes Integration Tests', () => {
     name: 'Cashier User',
   };
 
-  const adminToken = signAccessToken(adminPayload);
-  const cashierToken = signAccessToken(cashierPayload);
+  const adminToken = encodeURIComponent(JSON.stringify(adminPayload));
+  const cashierToken = encodeURIComponent(JSON.stringify(cashierPayload));
 
   describe('GET /api/v1/categories', () => {
     it('should allow all authenticated roles to fetch categories list', async () => {
