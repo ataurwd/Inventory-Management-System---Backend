@@ -14,13 +14,13 @@ async function seed() {
       
       const admin = new User({
         name: 'Super Admin',
-        email: 'admin@smartstock.local',
+        email: 'admin@sellflow.local',
         passwordHash: 'admin123', // Will be hashed by pre-save hook
         role: 'admin',
       });
       
       await admin.save();
-      logger.info('✅ Default admin created: admin@smartstock.local / admin123');
+      logger.info('✅ Default admin created: admin@sellflow.local / admin123');
     } else {
       logger.info('Admin user already exists. Skipping seed.');
     }

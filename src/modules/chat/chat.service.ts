@@ -296,7 +296,7 @@ export class ChatService {
       throw new Error('AI is not configured. Please add GEMINI_API_KEY to your environment variables.');
     }
 
-    const systemInstruction = `You are SmartStock AI, an advanced Business Intelligence and Inventory Management Assistant.
+    const systemInstruction = `You are SellFlow AI, an advanced Business Intelligence and Inventory Management Assistant.
 You have the following core capabilities:
 1. Sales Analytics: Compare performance across periods, calculate growth, identify top products.
 2. Smart Reporting: Generate executive summaries, highlight metrics, identify risks.
