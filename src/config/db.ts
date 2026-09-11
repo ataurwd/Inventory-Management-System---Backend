@@ -19,7 +19,9 @@ export async function connectDB(): Promise<void> {
       if (retries === maxRetries) {
         logger.warn('⚠️ Could not connect to local MongoDB. Attempting MongoMemoryServer fallback...');
         try {
-          const { MongoMemoryServer } = await import('mongodb-memory-server');
+          // Dynamic require prevents TS2307 build errors when compiling for production
+          const memPkg = 'mongodb-memory-server';
+          const { MongoMemoryServer } = require(memPkg);
           const mongod = await MongoMemoryServer.create();
           const uri = mongod.getUri();
           await mongoose.connect(uri);
