@@ -7,10 +7,12 @@ import { initFirebase } from './config/firebase';
 import { initSocket } from './config/socket';
 import { registerSocketManager } from './sockets/socket.manager';
 import { initScheduler } from './jobs/scheduler';
+import { seedData } from './config/seed';
 
 async function bootstrap(): Promise<void> {
   // ─── Connect to Database ──────────────────────────────────────────
   await connectDB();
+  await seedData();
 
   // ─── Initialize Firebase Admin ────────────────────────────────────
   initFirebase();

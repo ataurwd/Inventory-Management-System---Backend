@@ -23,13 +23,21 @@ export function initFirebase() {
         });
         logger.info('Firebase Admin SDK initialized successfully with environment variables');
       } else {
-        // Fallback for default application credentials (e.g. if GOOGLE_APPLICATION_CREDENTIALS is set)
-        initializeApp();
-        logger.info('Firebase Admin SDK initialized with default application credentials');
+        try {
+          const projectId = process.env.FIREBASE_PROJECT_ID || 'smartstockai-1c233';
+          initializeApp({ projectId });
+          logger.info(`Firebase Admin SDK initialized with project ID: ${projectId}`);
+        } catch (err) {
+          logger.warn('⚠️ Firebase Admin SDK initialization fallback error:', err);
+        }
       }
     }
   } catch (error) {
-    logger.error('Error initializing Firebase Admin SDK', error);
-    process.exit(1); // Force exit so we don't run in a broken state
+    logger.error('Error initializing Firebase Admin SDK:', error);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    } else {
+      logger.warn('⚠️ Server continuing in development mode without Firebase Admin SDK.');
+    }
   }
 }

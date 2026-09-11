@@ -17,8 +17,19 @@ export async function connectDB(): Promise<void> {
       retries++;
       logger.error(`MongoDB connection attempt ${retries}/${maxRetries} failed:`, error);
       if (retries === maxRetries) {
-        logger.warn('⚠️  Could not connect to MongoDB. Server will start without DB — some routes will be unavailable.');
-        return;
+        logger.warn('⚠️ Could not connect to local MongoDB. Attempting MongoMemoryServer fallback...');
+        try {
+          const { MongoMemoryServer } = await import('mongodb-memory-server');
+          const mongod = await MongoMemoryServer.create();
+          const uri = mongod.getUri();
+          await mongoose.connect(uri);
+          logger.info(`✅ Connected to MongoMemoryServer at ${uri}`);
+          return;
+        } catch (memErr) {
+          logger.error('Failed to start MongoMemoryServer:', memErr);
+          logger.warn('⚠️ Could not connect to MongoDB. Server will start without DB — some routes will be unavailable.');
+          return;
+        }
       }
       // Wait 3 seconds before retrying
       await new Promise((resolve) => setTimeout(resolve, 1000));

@@ -1,12 +1,8 @@
-import mongoose from 'mongoose';
-import { connectDB, disconnectDB } from './db';
 import { User } from '../modules/users/user.model';
 import { Category } from '../modules/categories/category.model';
 import { logger } from '../utils/logger';
 
-async function seed() {
-  await connectDB();
-
+export async function seedData(): Promise<void> {
   try {
     const adminCount = await User.countDocuments({ role: 'admin' });
     if (adminCount === 0) {
@@ -38,9 +34,5 @@ async function seed() {
     }
   } catch (error) {
     logger.error('Error during seeding:', error);
-  } finally {
-    await disconnectDB();
   }
 }
-
-seed();
